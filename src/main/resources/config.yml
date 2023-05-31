@@ -1,0 +1,17 @@
+string:
+  material: STRING
+  displayname: "&6&lPajęcza Śmierć"
+  lore: [ ]
+
+soul:
+  material: SOUL_LANTERN
+  displayname: "&6&lAntyCobweb"
+  lore: [ ]
+
+loc:
+  first: {}
+  second: {}
+
+deny:
+  first: {}
+  second: {}
