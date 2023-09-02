@@ -7,11 +7,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class CobwebCmd implements CommandExecutor {
+import java.util.Arrays;
+import java.util.List;
+
+public class CobwebCmd implements CommandExecutor, TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if(!sender.hasPermission("cobweb.admin"))
@@ -110,5 +115,19 @@ public class CobwebCmd implements CommandExecutor {
             return true;
         } catch (NumberFormatException e) {}
         return false;
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if(args.length==1)
+        {
+            return Arrays.asList("give", "selector", "region", "deny", "reload");
+        }
+        if(args.length==2)
+        {
+            if(args[0].equalsIgnoreCase("give"))
+                return Arrays.asList("cobweb", "antycobweb");
+        }
+        return null;
     }
 }

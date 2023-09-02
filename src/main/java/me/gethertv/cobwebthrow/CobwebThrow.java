@@ -3,10 +3,13 @@ package me.gethertv.cobwebthrow;
 import me.gethertv.cobwebthrow.cmd.CobwebCmd;
 import me.gethertv.cobwebthrow.data.Cuboid;
 import me.gethertv.cobwebthrow.listeners.InteractionEvent;
+import me.gethertv.cobwebthrow.scheduler.CleanCobwebTask;
 import me.gethertv.cobwebthrow.utils.Color;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -28,6 +31,8 @@ public final class CobwebThrow extends JavaPlugin {
     private static ItemStack selector;
     private static Location first;
     private static Location second;
+
+    private CleanCobwebTask cleanCobwebTask;
     @Override
     public void onEnable() {
         instance = this;
@@ -37,15 +42,41 @@ public final class CobwebThrow extends JavaPlugin {
         loadRemoveItem();
         loadSelector();
 
-        getServer().getPluginManager().registerEvents(new InteractionEvent(), this);
+        new InteractionEvent(this);
 
-        getCommand("cobweb").setExecutor(new CobwebCmd());
+        CobwebCmd cobwebCmd = new CobwebCmd();
+        getCommand("getcobweb").setExecutor(cobwebCmd);
+        getCommand("getcobweb").setTabCompleter(cobwebCmd);
 
+        implementRegions();
+        implementTask();
+    }
+
+    @Override
+    public void onDisable() {
+
+        Bukkit.getScheduler().cancelTasks(this);
+        HandlerList.unregisterAll(this);
+
+    }
+
+    private void implementRegions() {
         if(getConfig().getLocation("loc.first")!=null && getConfig().getLocation("loc.second")!=null)
             cuboid = new Cuboid(getConfig().getLocation("loc.first"), getConfig().getLocation("loc.second"));
 
         if(getConfig().getLocation("deny.first")!=null && getConfig().getLocation("deny.second")!=null)
             denyCuboid = new Cuboid(getConfig().getLocation("deny.first"), getConfig().getLocation("deny.second"));
+    }
+
+    private void implementTask() {
+        if(getConfig().isSet("delay-remove.status"))
+        {
+            if(getConfig().getBoolean("delay-remove.status"))
+            {
+                int second = getConfig().getInt("delay-remove.second");
+                cleanCobwebTask = new CleanCobwebTask(this, second);
+            }
+        }
     }
 
     public void reloadCustomPlugin()
@@ -94,9 +125,10 @@ public final class CobwebThrow extends JavaPlugin {
         removeItem.setItemMeta(itemMeta);
     }
 
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
+
+
+    public CleanCobwebTask getCleanCobwebTask() {
+        return cleanCobwebTask;
     }
 
     public static ItemStack getRemoveItem() {

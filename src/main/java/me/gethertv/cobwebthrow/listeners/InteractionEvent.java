@@ -7,6 +7,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,8 +31,17 @@ import java.util.UUID;
 
 public class InteractionEvent implements Listener {
 
+    private final CobwebThrow plugin;
     private static List<Fireball> fireballList = new ArrayList<>();
 
+    private HashMap<UUID, Long> cooldownAntycobweb = new HashMap<>();
+    private HashMap<UUID, Long> cooldownCobweb = new HashMap<>();
+
+    public InteractionEvent(CobwebThrow plugin)
+    {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
     @EventHandler
     public void onClick(PlayerInteractEvent event)
     {
@@ -78,9 +89,22 @@ public class InteractionEvent implements Listener {
                 return;
 
 
-            if(player.getItemInHand().isSimilar(CobwebThrow.getCobwebItem())) {
 
+            if(player.getItemInHand().isSimilar(CobwebThrow.getCobwebItem())) {
                 event.setCancelled(true);
+                FileConfiguration config = CobwebThrow.getInstance().getConfig();
+                Long timerLong = cooldownCobweb.get(player.getUniqueId());
+                if(timerLong!=null)
+                {
+                    if(timerLong>System.currentTimeMillis())
+                    {
+                        double diffTime = (double) (timerLong - System.currentTimeMillis()) / 1000;
+                        player.sendMessage(Color.addColors(config.getString("lang.cooldown.cobweb").replace("{time}", String.valueOf((int) diffTime))));
+                        return;
+                    }
+                }
+                cooldownCobweb.put(player.getUniqueId(), System.currentTimeMillis()+1000L*config.getInt("cooldown.cobweb"));
+
                 player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
 
                 Fireball fireball;
@@ -111,6 +135,18 @@ public class InteractionEvent implements Listener {
             if(player.getItemInHand().isSimilar(CobwebThrow.getRemoveItem()))
             {
                 event.setCancelled(true);
+                FileConfiguration config = CobwebThrow.getInstance().getConfig();
+                Long timerLong = cooldownAntycobweb.get(player.getUniqueId());
+                if(timerLong!=null)
+                {
+                    if(timerLong>System.currentTimeMillis())
+                    {
+                        double diffTime = (double) (timerLong - System.currentTimeMillis()) / 1000;
+                        player.sendMessage(Color.addColors(config.getString("lang.cooldown.antycobweb").replace("{time}", String.valueOf((int) diffTime))));
+                        return;
+                    }
+                }
+                cooldownAntycobweb.put(player.getUniqueId(), System.currentTimeMillis()+1000L*config.getInt("cooldown.antycobweb"));
                 player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
                 removeItem(player);
             }
@@ -130,64 +166,17 @@ public class InteractionEvent implements Listener {
                 return;
         }
 
-        if(loc.clone().getBlock().getType()==Material.AIR)
-            loc.clone().getBlock().setType(Material.AIR);
-
-        for(int i = 0; i<3; i++) {
-            if (loc.clone().add(-2, i, -2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-2, i, -2).getBlock().setType(Material.AIR);
-            if (loc.clone().add(-2, i, -1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-2, i, -1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(-2, i, 0).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-2, i, 0).getBlock().setType(Material.AIR);
-            if (loc.clone().add(-2, i, 1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-2, i, 1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(-2, i, 2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-2, i, 2).getBlock().setType(Material.AIR);
-
-            if (loc.clone().add(-1, i, -2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-1, i, -2).getBlock().setType(Material.AIR);
-            if (loc.clone().add(-1, i, -1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-1, i, -1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(-1, i, 0).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-1, i, 0).getBlock().setType(Material.AIR);
-            if (loc.clone().add(-1, i, 1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-1, i, 1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(-1, i, 2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(-1, i, 2).getBlock().setType(Material.AIR);
-
-            if (loc.clone().add(0, i, -2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(0, i, -2).getBlock().setType(Material.AIR);
-            if (loc.clone().add(0, i, -1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(0, i, -1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(0, i, 0).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(0, i, 0).getBlock().setType(Material.AIR);
-            if (loc.clone().add(0, i, 1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(0, i, 1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(0, i, 2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(0, i, 2).getBlock().setType(Material.AIR);
-
-            if (loc.clone().add(1, i, -2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(1, i, -2).getBlock().setType(Material.AIR);
-            if (loc.clone().add(1, i, -1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(1, i, -1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(1, i, 0).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(1, i, 0).getBlock().setType(Material.AIR);
-            if (loc.clone().add(1, i, 1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(1, i, 1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(1, i, 2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(1, i, 2).getBlock().setType(Material.AIR);
-
-            if (loc.clone().add(2, i, -2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(2, i, -2).getBlock().setType(Material.AIR);
-            if (loc.clone().add(2, i, -1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(2, i, -1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(2, i, 0).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(2, i, 0).getBlock().setType(Material.AIR);
-            if (loc.clone().add(2, i, 1).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(2, i, 1).getBlock().setType(Material.AIR);
-            if (loc.clone().add(2, i, 2).getBlock().getType() == Material.COBWEB)
-                loc.clone().add(2, i, 2).getBlock().setType(Material.AIR);
+        double tempRadius = CobwebThrow.getInstance().getConfig().getInt("size.antycobweb.width")/2;
+        int height = CobwebThrow.getInstance().getConfig().getInt("size.antycobweb.height");
+        int radius = (int) tempRadius;
+        for(int x = -radius; x < radius; x++) {
+            for (int y = 0; y < height; y++) {
+                for(int z = -radius; z < radius; z++) {
+                    Block block = loc.clone().add(x, y, z).getBlock();
+                    if (block.getType() == Material.COBWEB)
+                        block.setType(Material.AIR);
+                }
+            }
         }
     }
 
@@ -202,67 +191,21 @@ public class InteractionEvent implements Listener {
                 return;
         }
 
-        if(loc.clone().getBlock().getType()==Material.AIR)
-            loc.clone().getBlock().setType(Material.AIR);
-
-
-        for(int i = 0; i<3; i++)
-        {
-            if(loc.clone().add(-2, i, -2).getBlock().getType()==Material.AIR)
-                loc.clone().add(-2, i, -2).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(-2, i, -1).getBlock().getType()==Material.AIR)
-                loc.clone().add(-2, i, -1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(-2, i, 0).getBlock().getType()==Material.AIR)
-                loc.clone().add(-2, i, 0).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(-2, i, 1).getBlock().getType()==Material.AIR)
-                loc.clone().add(-2, i, 1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(-2, i, 2).getBlock().getType()==Material.AIR)
-                loc.clone().add(-2, i, 2).getBlock().setType(Material.COBWEB);
-
-            if(loc.clone().add(-1, i, -2).getBlock().getType()==Material.AIR)
-                loc.clone().add(-1, i, -2).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(-1, i, -1).getBlock().getType()==Material.AIR)
-                loc.clone().add(-1, i, -1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(-1, i, 0).getBlock().getType()==Material.AIR)
-                loc.clone().add(-1, i, 0).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(-1, i, 1).getBlock().getType()==Material.AIR)
-                loc.clone().add(-1, i, 1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(-1, i, 2).getBlock().getType()==Material.AIR)
-                loc.clone().add(-1, i, 2).getBlock().setType(Material.COBWEB);
-
-            if(loc.clone().add(0, i, -2).getBlock().getType()==Material.AIR)
-                loc.clone().add(0, i, -2).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(0, i, -1).getBlock().getType()==Material.AIR)
-                loc.clone().add(0, i, -1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(0, i, 0).getBlock().getType()==Material.AIR)
-                loc.clone().add(0, i, 0).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(0, i, 1).getBlock().getType()==Material.AIR)
-                loc.clone().add(0, i, 1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(0, i, 2).getBlock().getType()==Material.AIR)
-                loc.clone().add(0, i, 2).getBlock().setType(Material.COBWEB);
-
-            if(loc.clone().add(1, i, -2).getBlock().getType()==Material.AIR)
-            loc.clone().add(1, i, -2).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(1, i, -1).getBlock().getType()==Material.AIR)
-                loc.clone().add(1, i, -1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(1, i, 0).getBlock().getType()==Material.AIR)
-                loc.clone().add(1, i, 0).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(1, i, 1).getBlock().getType()==Material.AIR)
-                loc.clone().add(1, i, 1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(1, i, 2).getBlock().getType()==Material.AIR)
-                loc.clone().add(1, i, 2).getBlock().setType(Material.COBWEB);
-
-            if(loc.clone().add(2, i, -2).getBlock().getType()==Material.AIR)
-                loc.clone().add(2, i, -2).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(2, i, -1).getBlock().getType()==Material.AIR)
-                loc.clone().add(2, i, -1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(2, i, 0).getBlock().getType()==Material.AIR)
-                loc.clone().add(2, i, 0).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(2, i, 1).getBlock().getType()==Material.AIR)
-                loc.clone().add(2, i, 1).getBlock().setType(Material.COBWEB);
-            if(loc.clone().add(2, i, 2).getBlock().getType()==Material.AIR)
-                loc.clone().add(2, i, 2).getBlock().setType(Material.COBWEB);
-
+        double tempRadius = CobwebThrow.getInstance().getConfig().getInt("size.cobweb.width")/2;
+        int height = CobwebThrow.getInstance().getConfig().getInt("size.cobweb.height");
+        int radius = (int) tempRadius;
+        for(int x = -radius; x <= radius; x++) {
+            for (int y = 0; y <= height; y++) {
+                for(int z = -radius; z <= radius; z++) {
+                    Block block = loc.clone().add(x, y, z).getBlock();
+                    if (block.getType() == Material.AIR)
+                    {
+                        block.setType(Material.COBWEB);
+                        if(plugin.getCleanCobwebTask()!=null)
+                            plugin.getCleanCobwebTask().addBlock(block.getLocation());
+                    }
+                }
+            }
         }
 
 

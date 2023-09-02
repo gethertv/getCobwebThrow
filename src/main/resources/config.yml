@@ -1,12 +1,43 @@
+# permission: cobweb.admin
+# getcobweb give [cobweb/antycobweb] {player} {ilosc}
+# getcobweb reload
+# getcobweb selector
+# getcobweb deny - po zaznaczeniu selectorem ustawia region gdzie nie mozna uzywac
+# getcobweb region - jezeli posiadasz ustawiony region
+# gdzie nie mozna uzywac antyboweb/cobweb, to dzieki temu mozesz
+# ustawic w srodku zablokowanego regionu, region w ktorym mozna uzywac cobwebow
 string:
   material: STRING
   displayname: "&6&lPajęcza Śmierć"
   lore: [ ]
 
+# czy maja sie usuwac COBWEBY po X sekundach
+delay-remove:
+   status: true
+   # czas w sekundach
+   second: 30
+
 soul:
   material: SOUL_LANTERN
   displayname: "&6&lAntyCobweb"
   lore: [ ]
+
+lang:
+  cooldown:
+    antycobweb: "&cCooldown {time}"
+    cobweb: "&cCooldown {time}"
+
+size:
+  cobweb:
+    width: 5
+    height: 3
+  antycobweb:
+    width: 5
+    height: 3
+
+cooldown:
+  antycobweb: 3
+  cobweb: 4
 
 loc:
   first: {}
